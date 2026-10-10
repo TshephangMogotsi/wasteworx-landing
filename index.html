@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#006400" />
+    <title>Wasteworx</title>
+    <style>
+      :root { background: #006400; }
+
+      * { box-sizing: border-box; }
+
+      html, body { width: 100%; min-height: 100%; margin: 0; }
+
+      body {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #006400;
+      }
+
+      .globe {
+        display: block;
+        width: min(392px, 52vw);
+        height: auto;
+        transform-origin: center;
+        animation: globe-arrival 850ms cubic-bezier(.22, 1, .36, 1) both,
+                   globe-breathe 4.8s ease-in-out 900ms infinite;
+      }
+
+      @keyframes globe-arrival {
+        from { opacity: 0; transform: scale(.88); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes globe-breathe {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-6px) scale(1.012); }
+      }
+
+      @media (max-width: 520px) {
+        .globe { width: min(392px, 76vw); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .globe { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <img class="globe" src="Wasteworx%20globe.svg" alt="Wasteworx globe" />
+  </body>
+</html>
