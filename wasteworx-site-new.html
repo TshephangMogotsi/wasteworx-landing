@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WasteWorx | Transforming waste into value</title>
+<meta name="description" content="We collect, verify, and recycle, so everyone from collectors to corporates can see where it goes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Figma frame: 1512px, 12 columns, gutter 30, margin 140.
+   Margin is 140/1512 of the width, so the layout scales proportionally. */
+:root{
+  --deep:#004d00; --leaf:#007a00; --sun:#ffff00; --cream:#f2efd2; --card:#f8f1e0; --ink:#003300;
+  --display:'Bowlby One','Arial Black',Impact,system-ui,sans-serif; /* swap for the exact Figma display font */
+  --body:'Source Sans 3','Source Sans Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --margin:clamp(20px,9.26vw,140px);
+  --gutter:clamp(14px,1.98vw,30px);
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);color:var(--ink);background:var(--deep);-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);column-gap:var(--gutter);padding-inline:var(--margin);max-width:1920px;margin-inline:auto}
+.grid>*{min-width:0}
+h1,h2,.lab{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:1.05;letter-spacing:.01em}
+h1,h2{text-align:center;font-size:clamp(1.7rem,3.45vw,3.3rem)}
+.btn{display:inline-block;font-weight:700;font-size:clamp(.9rem,1.1vw,1.1rem);padding:.85em 1.7em;border-radius:999px;text-decoration:none;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.w{background:#fff;color:var(--deep)}
+.btn.y{background:var(--sun);color:var(--deep)}
+.btn.d{background:var(--deep);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+
+/* hero */
+.hero{background:var(--deep);color:#fff;text-align:center;padding:clamp(24px,2.6vw,40px) 0 clamp(48px,6.6vw,100px)}
+.logo{grid-column:1/-1;justify-self:start;display:flex;align-items:center;font-family:var(--display);font-size:clamp(1.1rem,1.7vw,1.6rem);color:#fff;text-decoration:none;letter-spacing:.01em}
+.logo svg{width:1.15em;height:.95em;margin:0 .02em}
+.hero .copy{grid-column:3/11;margin-top:clamp(8px,1.5vw,24px)}
+.hero h1{color:#fff}
+.hero p{font-size:clamp(1rem,1.3vw,1.25rem);margin:14px auto 0;max-width:34em;color:#f3f3d8}
+.hero .globe{grid-column:5/9;margin:clamp(16px,2.6vw,40px) 0 clamp(24px,4.5vw,70px)}
+.hero .btns{grid-column:1/-1}
+.globe svg{width:100%;height:auto;display:block}
+
+/* chain */
+.chain{background:var(--cream);padding:clamp(48px,6vw,96px) 0 clamp(48px,6.2vw,96px);overflow:hidden}
+.step{grid-column:span 3}
+.tile{aspect-ratio:1;background:#fff;border:1px solid var(--ink);border-radius:clamp(22px,3vw,44px);display:grid;place-items:center;font-size:clamp(3rem,6vw,5.5rem);margin-bottom:clamp(24px,4.4vw,66px);box-shadow:0 6px 0 rgba(0,77,0,.12)}
+.step:nth-child(1) .tile{transform:rotate(8deg)}
+.step:nth-child(2) .tile{transform:rotate(-8deg)}
+.step:nth-child(3) .tile{transform:rotate(3deg)}
+.step:nth-child(4) .tile{transform:rotate(-10deg)}
+.lab{color:var(--deep);font-size:clamp(1.1rem,2vw,1.9rem);margin-bottom:clamp(8px,1.4vw,20px);min-height:2.1em}
+.step p{color:var(--deep);font-size:clamp(.95rem,1.15vw,1.1rem)}
+@media(max-width:820px){.step{grid-column:span 6;margin-bottom:32px}.tile{max-width:260px}}
+@media(max-width:480px){.step{grid-column:1/-1}}
+
+/* split */
+.split{background:var(--deep);padding:clamp(56px,7vw,110px) 0 clamp(48px,6vw,90px)}
+.split h2{grid-column:1/-1;color:#fff;margin-bottom:clamp(28px,4vw,60px)}
+.pcard{grid-column:span 6;border-radius:clamp(20px,2.2vw,32px);padding:clamp(24px,2.9vw,44px);color:var(--deep);display:flex;flex-direction:column;gap:clamp(12px,1.6vw,24px)}
+.pcard.a{background:var(--sun)}
+.pcard.b{background:var(--card)}
+.pcard h3{font-size:clamp(1.3rem,2.1vw,2rem);line-height:1.15}
+.pcard ul{list-style:none;padding:0;display:grid;gap:clamp(10px,1.3vw,18px);flex:1}
+.pcard li{display:flex;gap:16px;align-items:center;font-size:clamp(.95rem,1.15vw,1.1rem)}
+.pcard li::before{content:"";flex:none;width:clamp(14px,1.6vw,22px);height:clamp(14px,1.6vw,22px);border-radius:50%;background:var(--leaf)}
+.pcard .btn{align-self:flex-start}
+@media(max-width:820px){.pcard{grid-column:1/-1;margin-bottom:var(--gutter)}}
+
+/* gallery */
+.gallery{background:var(--deep);color:#fff;padding:clamp(16px,3vw,48px) 0 0;text-align:center}
+.gallery h2{grid-column:1/-1;color:#fff}
+.gallery .globe{grid-column:6/8;margin:clamp(20px,3vw,44px) 0 clamp(28px,5vw,76px)}
+.wall{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gutter);height:clamp(380px,46vw,700px);overflow:hidden;align-items:start}
+.col{display:flex;flex-direction:column;gap:var(--gutter)}
+.col:nth-child(1){margin-top:clamp(30px,7vw,108px)}
+.col:nth-child(2){margin-top:0}
+.col:nth-child(3){margin-top:clamp(40px,11vw,170px)}
+.col:nth-child(4){margin-top:clamp(20px,4vw,60px)}
+.frame{background:#fff;border-radius:clamp(18px,2.4vw,36px);padding:clamp(6px,.9vw,14px)}
+.ph{border-radius:clamp(12px,1.7vw,26px);overflow:hidden;aspect-ratio:4/5;display:flex;align-items:flex-end;justify-content:flex-start;padding:12px;font-size:.8rem;font-weight:600;color:#fff;text-align:left}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.t{aspect-ratio:1/1.05}
+.g1{background:linear-gradient(160deg,#c9a24b,#7a5a1c)}
+.g2{background:linear-gradient(160deg,#6aa4d8,#cfa86a)}
+.g3{background:linear-gradient(160deg,#7b5a49,#3d2a20)}
+.g4{background:linear-gradient(160deg,#4a4a4a,#9a8f7a)}
+.g5{background:linear-gradient(160deg,#9bb86a,#2b6a33)}
+.g6{background:linear-gradient(160deg,#3a6aa8,#9cc6c6)}
+.g7{background:linear-gradient(160deg,#c04040,#aab6c2)}
+.g8{background:linear-gradient(160deg,#d8c28a,#8a6d3b)}
+@media(max-width:700px){.wall{grid-template-columns:1fr 1fr}.col:nth-child(n+3){display:none}}
+
+/* close */
+.close{background:var(--sun);padding-top:clamp(70px,11vw,170px)}
+.cta{grid-column:1/-1;background:var(--deep);color:#fff;text-align:center;border-radius:clamp(24px,2.6vw,40px) clamp(24px,2.6vw,40px) 0 0;padding:clamp(40px,5vw,76px) clamp(20px,4vw,60px) clamp(40px,4.4vw,70px)}
+.cta h2{color:#fff}
+.cta p{margin:clamp(14px,1.8vw,26px) auto clamp(20px,2.6vw,40px);max-width:36em;font-size:clamp(1rem,1.2vw,1.15rem);color:#f3f3d8}
+.mails{margin-top:clamp(20px,2.6vw,40px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px 32px;font-size:clamp(.9rem,1.1vw,1.05rem)}
+.mails a{color:#fff}
+footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.85rem;padding:20px var(--margin) 28px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="grid">
+    <a class="logo" href="#top" aria-label="WasteWorx home">WASTEW<svg viewBox="0 0 40 32" aria-hidden="true"><ellipse cx="20" cy="16" rx="19" ry="15" fill="#ffff00"/><path d="M8 9c4-4 9-3 10 1s-5 4-6 8-5 3-5-1 -2-6 1-8zM22 12c4-3 10-2 12 2s-3 8-6 9-6-3-5-6-4-2-1-5z" fill="#007a00"/></svg>RX</a>
+    <div class="copy" id="top">
+      <h1>Transforming waste into value</h1>
+      <p>We collect, verify, and recycle, so everyone from collectors to corporates can see where it goes.</p>
+    </div>
+    <div class="globe"><svg class="wglobe" viewBox="-20 -10 440 320" role="img" aria-label="Hand-drawn globe slowly spinning"></svg></div>
+    <div class="btns">
+      <a class="btn w" href="#collect">I collect or sell recyclables</a>
+      <a class="btn y" href="#report">I need to report recycling</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="chain" id="how">
+    <div class="grid">
+      <div class="step"><div class="tile" aria-hidden="true">♻️</div><div class="lab">Collect</div><p>Drop off at a BuyBack Center or schedule a pickup at your estate.</p></div>
+      <div class="step"><div class="tile" aria-hidden="true">⚖️</div><div class="lab">Weigh and verify</div><p>Every bag is weighed and logged, and WasteCoins are paid out straight away.</p></div>
+      <div class="step"><div class="tile" aria-hidden="true">🚚</div><div class="lab">Sold to recyclers</div><p>Sorted material goes on to buy back centers and processors.</p></div>
+      <div class="step"><div class="tile" aria-hidden="true">📄</div><div class="lab">Recycled and reported</div><p>The destination is confirmed and added to an auditable record.</p></div>
+    </div>
+  </section>
+
+  <section class="split">
+    <div class="grid">
+      <h2>One platform, built for both sides</h2>
+      <article class="pcard a" id="collect">
+        <h3>I collect or sell recyclables</h3>
+        <ul>
+          <li>Digital weigh records for every drop-off</li>
+          <li>Transparent, traceable payouts</li>
+          <li>A reliable route to sell your material</li>
+        </ul>
+        <a class="btn d" href="mailto:info@wasteworx.co.bw?subject=Partnering%20as%20a%20collector%20or%20center">I collect or sell recyclables</a>
+      </article>
+      <article class="pcard b" id="report">
+        <h3>I need to report recycling</h3>
+        <ul>
+          <li>Verified proof of where your material goes</li>
+          <li>Audit-ready data for ESG and CSR reporting</li>
+          <li>Recycler confirmation for each batch</li>
+        </ul>
+        <a class="btn d" href="mailto:info@wasteworx.co.bw?subject=WasteWorx%20demo%20for%20our%20organisation">I need to report recycling</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="gallery">
+    <div class="grid">
+      <h2>Saving the planet<br>one recyclable at a time</h2>
+      <div class="globe"><svg class="wglobe" viewBox="-20 -10 440 320" role="img" aria-label="Hand-drawn globe slowly spinning"></svg></div>
+      <!-- Swap each .ph for <div class="ph"><img src="photos/your-file.jpg" alt="..."></div> -->
+      <div class="wall">
+        <div class="col">
+          <div class="frame"><div class="ph t g1">Cardboard bales</div></div>
+          <div class="frame"><div class="ph g3">Scrap metal</div></div>
+        </div>
+        <div class="col">
+          <div class="frame"><div class="ph g2">Buy back center</div></div>
+          <div class="frame"><div class="ph g4">E-waste</div></div>
+        </div>
+        <div class="col">
+          <div class="frame"><div class="ph t g8">Collectors at work</div></div>
+          <div class="frame"><div class="ph g6">Glass bottles</div></div>
+        </div>
+        <div class="col">
+          <div class="frame"><div class="ph t g5">Plastics</div></div>
+          <div class="frame"><div class="ph g7">Aluminium cans</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" id="contact">
+    <div class="grid">
+      <div class="cta">
+        <h2>Let's turn waste into<br>value together</h2>
+        <p>Whether you live in an estate, run a business, or collect recyclables, we'd love to hear from you.</p>
+        <div class="btns">
+          <a class="btn w" href="mailto:info@wasteworx.co.bw?subject=Joining%20WasteWorx%20as%20a%20collector%20or%20center">I collect or sell recyclables</a>
+          <a class="btn y" href="mailto:info@wasteworx.co.bw?subject=WasteWorx%20demo%20for%20our%20organisation">I need to report recycling</a>
+        </div>
+        <div class="mails">
+          <a href="mailto:info@wasteworx.co.bw">info@wasteworx.co.bw</a>
+          <a href="mailto:ptsheko@wasteworx.co.bw">ptsheko@wasteworx.co.bw</a>
+          <a href="mailto:jmunatsi@wasteworx.co.bw">jmunatsi@wasteworx.co.bw</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 WasteWorx. Batswana building for Batswana.</footer>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg', W=400;
+  var shapes=[
+    [[30,70],[60,45],[100,50],[122,70],[112,102],[90,116],[70,100],[45,96]],
+    [[85,135],[115,130],[132,160],[116,206],[100,232],[90,190]],
+    [[190,60],[215,50],[247,58],[241,80],[215,90],[195,80]],
+    [[185,105],[225,96],[257,115],[246,150],[236,196],[215,212],[200,176],[180,140]],
+    [[250,60],[300,44],[362,60],[372,90],[340,116],[300,122],[270,100]],
+    [[320,170],[355,164],[372,186],[350,207],[325,196]]
+  ];
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+  function smooth(pts,dx){
+    var n=pts.length,d='';
+    for(var i=0;i<n;i++){
+      var p0=pts[(i-1+n)%n],p1=pts[i],p2=pts[(i+1)%n],p3=pts[(i+2)%n];
+      if(i===0)d+='M'+(p1[0]+dx).toFixed(1)+' '+p1[1].toFixed(1);
+      d+='C'+(p1[0]+(p2[0]-p0[0])/6+dx).toFixed(1)+' '+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)+' '
+        +(p2[0]-(p3[0]-p1[0])/6+dx).toFixed(1)+' '+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)+' '
+        +(p2[0]+dx).toFixed(1)+' '+p2[1].toFixed(1);
+    }
+    return d+'Z';
+  }
+  var globes=[];
+  document.querySelectorAll('.wglobe').forEach(function(svg,gi){
+    var id='clip'+gi, cp=el('clipPath',{id:id}), ce=el('ellipse',{cx:200,cy:150,rx:198,ry:148});
+    var defs=el('defs',{}); cp.appendChild(ce); defs.appendChild(cp); svg.appendChild(defs);
+    var disc=el('ellipse',{cx:200,cy:150,rx:190,ry:140,fill:'#ffff00'}); svg.appendChild(disc);
+    var g=el('g',{'clip-path':'url(#'+id+')',fill:'#007a00'}); svg.appendChild(g);
+    var paths=shapes.map(function(){var a=el('path',{}),b=el('path',{});g.appendChild(a);g.appendChild(b);return [a,b]});
+    globes.push({disc:disc,ce:ce,paths:paths});
+  });
+  var offset=0;
+  function draw(){
+    var jit=shapes.map(function(s){return s.map(function(p){return [p[0]+(Math.random()-.5)*5,p[1]+(Math.random()-.5)*5]})});
+    var wob=(Math.random()-.5)*3;
+    globes.forEach(function(o){
+      jit.forEach(function(j,i){
+        o.paths[i][0].setAttribute('d',smooth(j,-offset));
+        o.paths[i][1].setAttribute('d',smooth(j,W-offset));
+      });
+      o.disc.setAttribute('rx',190+wob);o.disc.setAttribute('ry',140-wob*.6);
+      o.ce.setAttribute('rx',198+wob);o.ce.setAttribute('ry',148-wob*.6);
+    });
+  }
+  draw();
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  setInterval(function(){offset=(offset+12)%W;draw()},140);
+})();
+</script>
+</body>
+</html>

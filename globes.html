@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wasteworx globe — hand-drawn animation</title>
+  <style>
+    :root {
+      --background: #006400;
+      --globe-width: min(62vw, 640px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { width: 100%; height: 100%; margin: 0; }
+
+    body {
+      overflow: hidden;
+      background: var(--background);
+    }
+
+    .wrap {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: var(--globe-width);
+      aspect-ratio: 359.65198 / 246.03487;
+      transform: translate(-50%, -50%);
+    }
+
+    .controls {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: calc(100vw - 48px);
+      padding: 8px;
+      border: 1px solid rgb(255 255 255 / 32%);
+      border-radius: 999px;
+      background: rgb(0 50 0 / 82%);
+      color: #fff;
+      font: 600 14px/1 system-ui, sans-serif;
+    }
+
+    .frame-name {
+      min-width: 116px;
+      padding: 0 8px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .control {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid rgb(255 255 255 / 45%);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .control:hover { background: rgb(255 255 255 / 16%); }
+    .control:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+    @media (max-width: 560px) {
+      .controls { right: 12px; bottom: 12px; gap: 4px; }
+      .frame-name { min-width: 104px; font-size: 12px; }
+      .control { min-width: 32px; padding: 0 8px; }
+    }
+
+    .globe {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <img class="globe" src="globes%203/globe_001.svg" alt="Animated Wasteworx globe">
+  </main>
+  <div class="controls" aria-label="Animation controls">
+    <button class="control" id="previous" type="button" aria-label="Previous frame">←</button>
+    <output class="frame-name" id="frame-name" aria-live="polite">globe_001.svg</output>
+    <button class="control" id="next" type="button" aria-label="Next frame">→</button>
+    <button class="control" id="play-toggle" type="button" aria-pressed="true">Pause</button>
+    <button class="control" id="slower" type="button" aria-label="Decrease frame rate">−</button>
+    <output class="frame-name" id="frame-rate" aria-live="polite">12 FPS</output>
+    <button class="control" id="faster" type="button" aria-label="Increase frame rate">+</button>
+  </div>
+
+  <script>
+    // The fixed-canvas hand-drawn transition points, in sequence.
+    const MIN_FPS = 1;
+    const MAX_FPS = 24;
+    const globe = document.querySelector('.globe');
+    const frameName = document.querySelector('#frame-name');
+    const previous = document.querySelector('#previous');
+    const next = document.querySelector('#next');
+    const playToggle = document.querySelector('#play-toggle');
+    const slower = document.querySelector('#slower');
+    const faster = document.querySelector('#faster');
+    const frameRate = document.querySelector('#frame-rate');
+    const frameUrl = frame => `globes%203/globe_${String(frame).padStart(3, '0')}.svg`;
+    const frameFileName = frame => `globe_${String(frame).padStart(3, '0')}.svg`;
+
+    let frames = [];
+    let frame = 0;
+    let playing = false;
+    let last = performance.now();
+    let fps = 12;
+
+    function showFrame(index) {
+      globe.src = frames[index].url;
+      frameName.textContent = frames[index].name;
+    }
+
+    // Frames are discovered in numeric order. Add globe_052.svg and onward,
+    // then refresh: no frame-count change is needed here.
+    async function discoverFrames() {
+      const discovered = [];
+
+      for (let number = 1; ; number += 1) {
+        const image = new Image();
+        image.src = frameUrl(number);
+
+        try {
+          await image.decode();
+          discovered.push({ name: frameFileName(number), url: image.src });
+        } catch {
+          break;
+        }
+      }
+
+      return discovered;
+    }
+
+    function updatePlaybackControl() {
+      playToggle.textContent = playing ? 'Pause' : 'Resume';
+      playToggle.setAttribute('aria-pressed', String(playing));
+    }
+
+    function updateFrameRate() {
+      frameRate.textContent = `${fps} FPS`;
+      slower.disabled = fps <= MIN_FPS;
+      faster.disabled = fps >= MAX_FPS;
+      last = performance.now();
+    }
+
+    function changeFrameRate(amount) {
+      fps = Math.max(MIN_FPS, Math.min(MAX_FPS, fps + amount));
+      updateFrameRate();
+    }
+
+    function pause() {
+      playing = false;
+      updatePlaybackControl();
+    }
+
+    function stepFrame(direction) {
+      if (!frames.length) return;
+      pause();
+      frame = (frame + direction + frames.length) % frames.length;
+      showFrame(frame);
+    }
+
+    previous.addEventListener('click', () => stepFrame(-1));
+    next.addEventListener('click', () => stepFrame(1));
+    playToggle.addEventListener('click', () => {
+      playing = !playing;
+      last = performance.now();
+      updatePlaybackControl();
+    });
+    slower.addEventListener('click', () => changeFrameRate(-1));
+    faster.addEventListener('click', () => changeFrameRate(1));
+
+    previous.disabled = true;
+    next.disabled = true;
+    playToggle.disabled = true;
+    updatePlaybackControl();
+    updateFrameRate();
+
+    discoverFrames().then(discovered => {
+      frames = discovered;
+      if (!frames.length) return;
+
+      showFrame(frame);
+      previous.disabled = false;
+      next.disabled = false;
+      playToggle.disabled = false;
+      playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      updatePlaybackControl();
+
+      function animate(now) {
+        const step = 1000 / fps;
+        if (playing && now - last >= step) {
+          last = now - ((now - last) % step);
+          frame = (frame + 1) % frames.length;
+          showFrame(frame);
+        }
+        requestAnimationFrame(animate);
+      }
+
+      requestAnimationFrame(animate);
+    });
+  </script>
+</body>
+</html>
