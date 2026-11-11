@@ -1,0 +1,117 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>WasteWorx animation checks</title>
+<style>body{margin:0;font:16px/1.5 system-ui;background:#eee;color:#123}pre{padding:20px;white-space:pre-wrap}iframe{border:0;display:block;margin:0 auto;max-width:none}</style>
+<pre id="results">Running Chrome animation checks…</pre>
+<iframe src="../index.html" width="1439" height="675" title="Landing page test preview"></iframe>
+<script>
+const iframe = document.querySelector('iframe');
+const output = document.querySelector('#results');
+const results = [];
+const assert = (condition, name, details = '') => results.push({ pass: Boolean(condition), name, details });
+const frames = (win, count = 3) => new Promise(resolve => {
+  function next() { if (--count <= 0) resolve(); else win.requestAnimationFrame(next); }
+  win.requestAnimationFrame(next);
+});
+iframe.addEventListener('load', async () => {
+  try {
+    const win = iframe.contentWindow;
+    const doc = win.document;
+    await doc.fonts.ready;
+    assert(win.gsap?.version === '3.15.0', 'GSAP 3.15.0 loads locally');
+    assert(Boolean(win.ScrollTrigger), 'ScrollTrigger loads locally');
+    for (const [width, height] of [[1439,675], [1024,600], [390,844]]) {
+      iframe.width = width; iframe.height = height;
+      await frames(win, 4);
+      win.scrollTo({ top: 0, behavior: 'instant' });
+      win.ScrollTrigger.refresh();
+      await frames(win, 3);
+      const nav = doc.querySelector('.sticky-nav');
+      const buttons = [...nav.querySelectorAll('.btn')];
+      const trigger = win.ScrollTrigger.getById('hero-nav-morph');
+      assert(trigger?.end > trigger?.start, `${width}: valid morph range`);
+      assert(nav.inert && !nav.classList.contains('is-visible'), `${width}: hero controls restored at top`);
+      let edgeError = 0, lag = 0;
+      const points = Array.from({length: 21}, (_, i) => trigger.start + (trigger.end-trigger.start) * i/20);
+      for (const scroll of [...points, trigger.end+30, ...points.toReversed()]) {
+        win.scrollTo({ top: scroll, behavior: 'instant' });
+        await frames(win, 3);
+        if (!nav.inert && win.scrollY < trigger.end) {
+          edgeError = Math.max(edgeError, Math.abs(nav.getBoundingClientRect().bottom - doc.querySelector('.chain').getBoundingClientRect().top));
+        }
+        for (const button of buttons) {
+          lag = Math.max(lag, Math.abs(new win.DOMMatrix(win.getComputedStyle(button).transform).m41 - new win.DOMMatrix(button.style.transform).m41));
+        }
+      }
+      assert(edgeError < 1, `${width}: bar stays attached to section edge`, `max error ${edgeError.toFixed(3)}px`);
+      assert(lag < 0.01, `${width}: no extra CSS transform lag`, `max lag ${lag.toFixed(3)}px`);
+      win.scrollTo({ top: trigger.end+50, behavior: 'instant' });
+      await frames(win);
+      const before = buttons.map(button => button.getBoundingClientRect().left);
+      assert(Math.abs(nav.getBoundingClientRect().top) < 1, `${width}: navbar docks at viewport top`);
+      assert(buttons.every(button => Math.abs(win.gsap.getProperty(button,'x')) < 0.01), `${width}: buttons reach final horizontal position`);
+      win.ScrollTrigger.refresh();
+      await frames(win);
+      const refreshError = Math.max(...buttons.map((button,i) => Math.abs(button.getBoundingClientRect().left-before[i])));
+      assert(refreshError < 1, `${width}: refresh preserves docked positions`, `max error ${refreshError.toFixed(3)}px`);
+      assert(buttons.every(button => button.getBoundingClientRect().right <= width+1 && button.getBoundingClientRect().left >= 0), `${width}: both buttons fit viewport`);
+      win.scrollTo({ top:0, behavior:'instant' }); await frames(win);
+      assert(nav.inert && !doc.querySelector('.hero').classList.contains('is-morphing'), `${width}: reverse restores hero`);
+    }
+    // Inspect the scrubbed gallery at each viewport size. Geometry checks
+    // catch cards leaving as a column or passing through their predecessor.
+    for (const [width, height] of [[1439,675], [600,800], [390,844]]) {
+      iframe.width = width; iframe.height = height;
+      await frames(win,4);
+      win.ScrollTrigger.refresh(); await frames(win);
+      const trigger = win.ScrollTrigger.getById('gallery-card-rise');
+      const timeline = trigger.animation;
+      const columns = [...doc.querySelectorAll('.gallery .col')].filter(col => win.getComputedStyle(col).display !== 'none');
+      const launches = timeline.getChildren().filter(tween => tween.vars.data === 'gallery-exit');
+      assert(launches.length === columns.length * 3, `${width}: earlier rows exit while the last row stays`);
+      assert(new Set(launches.map(tween => tween.startTime().toFixed(3))).size > 4, `${width}: exits stagger across columns and rows`);
+      let overlap = 0;
+      for (let i = 0; i <= 200; i++) {
+        timeline.time(timeline.duration() * i / 200, true);
+        for (const col of columns) {
+          const cards = [...col.children];
+          for (let j = 1; j < cards.length; j++) {
+            const above = cards[j-1].getBoundingClientRect();
+            const below = cards[j].getBoundingClientRect();
+            const section = doc.querySelector('.gallery').getBoundingClientRect();
+            if (j < cards.length - 1 && below.top < section.bottom && above.bottom > section.top) {
+              overlap = Math.max(overlap, above.bottom - below.top);
+            }
+          }
+        }
+      }
+      assert(overlap <= 1, `${width}: cards never overtake or obstruct the card above`, `overlap ${overlap.toFixed(2)}px`);
+      assert(columns.every(col => [...col.children].slice(0,-1).every(card => card.getBoundingClientRect().bottom < doc.querySelector('.gallery').getBoundingClientRect().top)), `${width}: earlier rows clear the section top`);
+      assert(doc.querySelector('.gallery .close .cta') && Number(win.gsap.getProperty(doc.querySelector('.close'),'opacity')) === 1, `${width}: final row hands off to the real contact section`);
+      const launch = launches[0];
+      const card = launch.targets()[0];
+      const at = fraction => { timeline.time(launch.startTime()+launch.duration()*fraction, true); return Number(win.gsap.getProperty(card,'y')); };
+      const y0=at(0), y1=at(0.25), y2=at(0.75), y3=at(1);
+      assert(y2-y3 > (y0-y1)*1.3 && y2-y3 < (y0-y1)*2.5, `${width}: exit accelerates gently toward the top`);
+      const drift = timeline.getChildren().find(tween => tween.vars.data === 'gallery-drift' && tween.targets()[0] === card);
+      const driftSpeed = Math.abs(Number(drift.vars.y()) / drift.duration());
+      const exitSpeed = Math.abs((at(0.001)-at(0)) / (launch.duration()*0.001));
+      assert(Math.abs(exitSpeed-driftSpeed) < 1, `${width}: drift flows into exit without a velocity jump`);
+      const exitScroll = launch.duration()/timeline.duration()*(trigger.end-trigger.start);
+      assert(exitScroll > card.offsetHeight, `${width}: departure spans more than one card height of scrolling`, `${exitScroll.toFixed(0)}px scroll`);
+      timeline.time(0, true);
+      assert(columns.every(col => Number(win.gsap.getProperty(col.firstElementChild,'y')) > 0), `${width}: reverse restores staggered arrival`);
+    }
+    iframe.width=1439; iframe.height=675;
+    await frames(win,4); win.ScrollTrigger.refresh(); await frames(win);
+    win.scrollTo({top:win.ScrollTrigger.getById('hero-nav-morph').end+30,behavior:'instant'});
+    await frames(win);
+    const first = doc.querySelector('.wglobe').src;
+    await frames(win,8);
+    assert(doc.querySelector('.wglobe').src !== first, 'Globe continues animating');
+  } catch(error) { assert(false, 'Browser test exception', error.stack); }
+  const failed = results.filter(result => !result.pass);
+  output.textContent = `${failed.length ? 'FAIL' : 'PASS'}: ${results.length-failed.length}/${results.length} checks\n` + [...failed, ...results.filter(result => result.pass)].map(result=>`${result.pass?'✓':'✗'} ${result.name}${result.details?' — '+result.details:''}`).join('\n');
+  document.title = `${failed.length ? 'FAIL' : 'PASS'} — WasteWorx animation checks`;
+});
+</script>

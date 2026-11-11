@@ -1,0 +1,7 @@
+*
+!index.html
+!vendor
+!vendor/**
+!globes 3
+!globes 3/**
+!vercel.json

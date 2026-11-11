@@ -48,9 +48,6 @@ p{text-wrap:pretty}
 .hero{display:flex;flex-direction:column;min-height:100vh;min-height:100svh;background:var(--deep);color:#fff;text-align:center;padding:var(--space-4) 0 var(--space-8)}
 main{position:relative;z-index:1}
 .hero{position:relative;z-index:0}
-@media(prefers-reduced-motion:no-preference){
-  .hero{transform:translate3d(0,var(--hero-parallax,0px),0)}
-}
 .hero>.grid{flex:1;width:100%;grid-template-rows:auto 1fr}
 .hero-content{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-block:24px}
 .logo{grid-column:1/-1;justify-self:start;display:flex;align-items:center;font-family:var(--display);font-size:1.5rem;line-height:1.2;color:#fff;text-decoration:none}
@@ -82,8 +79,7 @@ main{position:relative;z-index:1}
 .pcard .btn{align-self:flex-start}
 
 .gallery{background:var(--deep);color:#fff;padding:var(--space-6) 0 0;text-align:center}
-.gallery h2{grid-column:1/-1;color:#fff}
-.gallery .globe{grid-column:1/-1;justify-self:center;width:160px;margin:var(--space-3) 0 var(--space-5)}
+.gallery h2{grid-column:1/-1;color:#fff;margin-bottom:var(--space-5)}
 .wall{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gutter);height:clamp(380px,40vw,560px);overflow:hidden;align-items:start}
 .col{display:flex;flex-direction:column;gap:var(--gutter)}
 .col:nth-child(1){margin-top:var(--space-8)}
@@ -147,6 +143,44 @@ footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.875rem;
   .hero{padding-block:16px}
   .hero .globe{width:max(80px,min(300px,calc((100svh - 450px) * 1.4618)));margin-block:12px}
 }
+/* Fixed destination for the hero globe and calls to action. The three
+   items are transformed from their hero positions as the section rises. */
+.sticky-nav{position:fixed;inset:0 0 auto;z-index:20;visibility:hidden;pointer-events:none;isolation:isolate}
+.sticky-nav::before{content:"";position:absolute;inset:0;background:var(--deep);box-shadow:0 1px 0 rgb(255 255 255 / .12);opacity:var(--nav-background,0);z-index:-1}
+.sticky-nav.is-visible{visibility:visible}
+.nav-inner{max-width:1408px;margin-inline:auto;padding:16px var(--margin);display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav-globe{display:block;flex:none;width:78px;line-height:0;transform-origin:top left}
+.nav-globe img{display:block;width:100%;height:auto;aspect-ratio:359.65198 / 246.03487}
+.nav-actions{display:flex;justify-content:flex-end;gap:16px;min-width:0}
+/* GSAP owns these transforms. The generic button hover transition
+   must not interpolate them a second time after the navbar has docked. */
+.nav-actions .btn{transform-origin:top left;transition:none}
+.sticky-nav.is-visible .nav-globe,.sticky-nav.is-visible .btn{pointer-events:auto}
+.hero.is-morphing .globe,.hero.is-morphing .btns{visibility:hidden}
+html{scroll-padding-top:104px}
+@media(max-width:700px){
+  .nav-inner{padding:12px 16px;gap:12px}
+  .nav-globe{width:64px}
+  .nav-actions{flex:1;gap:8px}
+  .nav-actions .btn{flex:1;max-width:180px;font-size:12px;min-height:48px;padding:8px 10px}
+}
+/* Keep the original masonry grid; clip only at the section boundary. */
+.gallery.is-animated{position:relative;isolation:isolate;overflow:clip;height:calc(100svh - 104px);min-height:400px}
+.gallery.is-animated>.grid{height:100%;grid-template-rows:auto minmax(0,1fr)}
+.gallery.is-animated h2{position:relative;z-index:2}
+.gallery.is-animated h2{will-change:transform}
+.gallery.is-animated .wall{position:relative;z-index:1;overflow:visible;height:100%}
+.gallery.is-animated .col{position:relative}
+.gallery.is-animated .frame{position:relative;will-change:transform}
+.gallery.is-animated .frame::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--deep);opacity:var(--merge-fill,0);pointer-events:none}
+.gallery .close.is-morphing-close{position:absolute;inset:0;z-index:3;padding-top:64px;background:transparent;text-align:center}
+.gallery .is-morphing-close>.grid{height:100%;align-items:start}
+.gallery .is-morphing-close .cta{position:relative;min-width:0;overflow:hidden}
+.gallery .is-morphing-close h2{margin-bottom:0}
+.gallery footer.is-morphing-footer{position:absolute;inset:auto 0 0;z-index:4;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;background:transparent;text-align:left;isolation:isolate}
+.gallery footer.is-morphing-footer::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--deep);transform:scaleX(var(--footer-spread,0));transform-origin:center}
+.gallery .is-morphing-footer>span{display:block;max-width:48%}
+.gallery .is-morphing-footer>span:last-child{text-align:right}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
 </style>
 </head>
@@ -168,6 +202,16 @@ footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.875rem;
     </div>
   </div>
 </header>
+
+<nav class="sticky-nav" aria-label="WasteWorx navigation" aria-hidden="true" inert>
+  <div class="nav-inner">
+    <a class="nav-globe" href="#top" aria-label="WasteWorx home"><img class="wglobe" src="globes%203/globe_001.svg" alt="" width="360" height="246"></a>
+    <div class="nav-actions">
+      <a class="btn w" href="#collect">I collect or sell recyclables</a>
+      <a class="btn y" href="#report">I need to report recycling</a>
+    </div>
+  </div>
+</nav>
 
 <main>
   <section class="chain" id="how" aria-labelledby="how-title">
@@ -207,24 +251,31 @@ footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.875rem;
   <section class="gallery">
     <div class="grid">
       <h2>Saving the planet<br>one recyclable at a time</h2>
-      <div class="globe"><img class="wglobe" src="globes%203/globe_001.svg" alt="Hand-drawn WasteWorx globe" width="360" height="246"></div>
       <!-- Swap each .ph for <div class="ph"><img src="photos/your-file.jpg" alt="..."></div> -->
       <div class="wall">
         <div class="col">
           <div class="frame"><div class="ph t g1">Cardboard bales</div></div>
           <div class="frame"><div class="ph g3">Scrap metal</div></div>
+          <div class="frame"><div class="ph t g8">Mixed paper</div></div>
+          <div class="frame"><div class="ph g5">Plastic bottles</div></div>
         </div>
         <div class="col">
           <div class="frame"><div class="ph g2">Buy back center</div></div>
           <div class="frame"><div class="ph g4">E-waste</div></div>
+          <div class="frame"><div class="ph g7">Steel tins</div></div>
+          <div class="frame"><div class="ph t g1">Paper cartons</div></div>
         </div>
         <div class="col">
           <div class="frame"><div class="ph t g8">Collectors at work</div></div>
           <div class="frame"><div class="ph g6">Glass bottles</div></div>
+          <div class="frame"><div class="ph t g2">Plastic containers</div></div>
+          <div class="frame"><div class="ph g3">Aluminium scrap</div></div>
         </div>
         <div class="col">
           <div class="frame"><div class="ph t g5">Plastics</div></div>
           <div class="frame"><div class="ph g7">Aluminium cans</div></div>
+          <div class="frame"><div class="ph g6">Glass jars</div></div>
+          <div class="frame"><div class="ph t g8">Newspapers</div></div>
         </div>
       </div>
     </div>
@@ -249,50 +300,336 @@ footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.875rem;
   </section>
 </main>
 
-<footer>© 2026 WasteWorx. Batswana building for Batswana.</footer>
+<footer><span>© 2026 WasteWorx.</span> <span>Batswana building for Batswana.</span></footer>
 
+
+<script src="vendor/gsap/gsap.min.js"></script>
+<script src="vendor/gsap/ScrollTrigger.min.js"></script>
 <script>
 (() => {
+  // Keep the page usable if an animation dependency cannot load.
+  if (!window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
   const hero = document.querySelector('.hero');
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  let heroHeight = hero.offsetHeight;
-  let scheduled = null;
+  const heroButtons = hero.querySelector('.btns');
+  const nav = document.querySelector('.sticky-nav');
+  const sources = [hero.querySelector('.globe'), ...heroButtons.querySelectorAll('.btn')];
+  const targets = [nav.querySelector('.nav-globe'), ...nav.querySelectorAll('.btn')];
+  let active = false;
 
-  function draw() {
-    scheduled = null;
-    // The foreground scrolls normally while the hero travels at 65% speed.
-    // Clamp after the reveal so the hero stays behind the following sections.
-    const progress = Math.min(Math.max(window.scrollY, 0), heroHeight);
-    hero.style.setProperty('--hero-parallax', `${progress * 0.35}px`);
+  function setActive(next) {
+    if (next === active) return;
+    const focusedElement = document.activeElement;
+    active = next;
+    nav.classList.toggle('is-visible', active);
+    hero.classList.toggle('is-morphing', active);
+    nav.inert = !active;
+    nav.setAttribute('aria-hidden', String(!active));
+    heroButtons.inert = active;
+    const from = active ? sources : targets;
+    const to = active ? targets : sources;
+    const focused = from.indexOf(focusedElement);
+    if (focused > 0) to[focused].focus({ preventScroll: true });
   }
 
-  function schedule() {
-    if (!reducedMotion.matches && scheduled === null) {
-      scheduled = requestAnimationFrame(draw);
+  gsap.matchMedia().add({
+    animate: '(prefers-reduced-motion: no-preference)',
+    reduce: '(prefers-reduced-motion: reduce)'
+  }, context => {
+    const reduced = context.conditions.reduce;
+    const layout = {};
+
+    function measure() {
+      // Measure both layouts without transforms. Refresh invalidates the
+      // timelines afterwards, so each resize gets fresh FLIP coordinates.
+      gsap.set(hero, { y: 0 });
+      gsap.set([nav, ...targets], { x: 0, y: 0, scaleX: 1, scaleY: 1 });
+      const scroll = window.scrollY;
+      layout.height = hero.offsetHeight;
+      layout.sectionTop = document.querySelector('.chain').getBoundingClientRect().top + scroll;
+      layout.navHeight = nav.offsetHeight;
+      layout.sources = sources.map(element => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, top: rect.top + scroll, width: rect.width, height: rect.height };
+      });
+      layout.targets = targets.map(element => element.getBoundingClientRect());
+      const bottom = Math.max(...layout.sources.slice(1).map(rect => rect.top + rect.height));
+      const inset = layout.navHeight - Math.max(...layout.targets.slice(1).map(rect => rect.bottom));
+      layout.end = Math.max(1, layout.sectionTop - layout.navHeight);
+      layout.start = Math.min(layout.end - 1, Math.max(0, (layout.sectionTop - bottom - inset) / 0.35));
+      layout.rowTop = layout.end - layout.start;
     }
-  }
 
-  function measure() {
-    heroHeight = hero.offsetHeight;
-    schedule();
-  }
+    measure();
+    ScrollTrigger.addEventListener('refreshInit', measure);
 
-  function updateMotion() {
-    cancelAnimationFrame(scheduled);
-    scheduled = null;
-    if (reducedMotion.matches) {
-      window.removeEventListener('scroll', schedule);
-      hero.style.removeProperty('--hero-parallax');
+    if (reduced) {
+      // Preserve the useful sticky navigation without the parallax or morph.
+      gsap.set(nav, { '--nav-background': 1 });
+      ScrollTrigger.create({
+        id: 'hero-nav-reduced',
+        start: () => layout.end,
+        end: 'max',
+        onUpdate: self => setActive(self.scroll() >= self.start),
+        onRefresh: self => setActive(self.scroll() >= self.start)
+      });
     } else {
-      window.addEventListener('scroll', schedule, { passive: true });
-      measure();
-    }
-  }
+      gsap.to(hero, {
+        y: () => layout.height * 0.35,
+        ease: 'none',
+        scrollTrigger: {
+          id: 'hero-parallax',
+          start: 0,
+          end: () => layout.height,
+          scrub: true,
+          invalidateOnRefresh: true,
+          refreshPriority: 2
+        }
+      });
 
-  new ResizeObserver(measure).observe(hero);
-  window.addEventListener('pageshow', measure);
-  reducedMotion.addEventListener('change', updateMotion);
-  updateMotion();
+      const timeline = gsap.timeline({
+        defaults: { duration: 1, ease: 'power2.inOut' },
+        scrollTrigger: {
+          id: 'hero-nav-morph',
+          start: () => layout.start,
+          end: () => layout.end,
+          scrub: true,
+          invalidateOnRefresh: true,
+          refreshPriority: 1,
+          onUpdate: self => setActive(self.progress > 0),
+          onRefresh: self => setActive(self.progress > 0)
+        }
+      });
+
+      // Vertical travel is linear and exactly follows the cream section edge.
+      // Easing applies only to the globe/controls inside this moving row.
+      timeline.fromTo(nav, { y: () => layout.rowTop }, { y: 0, ease: 'none' }, 0);
+      targets.forEach((element, index) => {
+        timeline.fromTo(element, {
+          x: () => layout.sources[index].left - layout.targets[index].left,
+          y: () => layout.sources[index].top - layout.start + Math.min(layout.start, layout.height) * 0.35 - layout.targets[index].top - layout.rowTop,
+          scaleX: () => layout.sources[index].width / layout.targets[index].width,
+          scaleY: () => layout.sources[index].height / layout.targets[index].height,
+          transformOrigin: 'top left'
+        }, { x: 0, y: 0, scaleX: 1, scaleY: 1 }, 0);
+      });
+      timeline.fromTo(nav, { '--nav-background': 0 }, {
+        '--nav-background': 1, duration: 0.35, ease: 'sine.inOut'
+      }, 0.65);
+    }
+
+    return () => {
+      ScrollTrigger.removeEventListener('refreshInit', measure);
+      setActive(false);
+    };
+  });
+
+  // Give the early sections the same gentle scroll response as the gallery.
+  gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    document.querySelectorAll('.chain > .grid, .split > .grid').forEach(section => {
+      gsap.fromTo(section, { y: 32, opacity: 0.85 }, {
+        y: 0, opacity: 1, ease: 'sine.out',
+        scrollTrigger: {
+          trigger: section, start: 'top 95%', end: 'top 60%',
+          scrub: 0.45, invalidateOnRefresh: true
+        }
+      });
+    });
+  });
+
+  // Preserve velocity between arrival, drift, and departure. The exit
+  // gathers speed gradually rather than snapping into a steep power ease.
+  const gallery = document.querySelector('.gallery');
+  gsap.matchMedia().add({
+    desktop: '(min-width: 561px)',
+    mobile: '(max-width: 560px)',
+    motion: '(prefers-reduced-motion: no-preference)'
+  }, context => {
+    if (!context.conditions.motion) return;
+    gallery.classList.add('is-animated');
+    const wall = gallery.querySelector('.wall');
+    const columns = [...wall.querySelectorAll('.col')].slice(0, context.conditions.mobile ? 2 : 4);
+    const rowCount = Math.max(...columns.map(column => column.children.length));
+    const galleryHeading = gallery.querySelector('h2');
+    const close = document.querySelector('.close');
+    const cta = close.querySelector('.cta');
+    const copy = [...cta.children];
+    const footer = document.querySelector('footer');
+    const footerEnds = [...footer.children];
+    const footerHome = document.createComment('Footer returns here without motion');
+    footer.before(footerHome);
+    gallery.append(footer);
+    footer.classList.add('is-morphing-footer');
+    const home = document.createComment('Contact section returns here without motion');
+    close.before(home);
+    gallery.append(close);
+    close.classList.add('is-morphing-close');
+    const lastCards = columns.map(column => column.lastElementChild);
+    const galleryTimeline = gsap.timeline({
+      scrollTrigger: {
+        id: 'gallery-card-rise',
+        trigger: gallery,
+        start: 'top 104px',
+        end: () => `+=${window.innerHeight * Math.max(3.2, rowCount * 2 + 9)}`,
+        pin: true,
+        scrub: 0.45,
+        anticipatePin: 1,
+        invalidateOnRefresh: true
+      }
+    });
+
+    function composeCards() {
+      galleryTimeline.clear();
+      // Restore intrinsic sizes before measuring after a resize/refresh.
+      gsap.set(lastCards, { width: '100%', height: 'auto', padding: 8, scaleY: 1 });
+      const mergedHeight = Math.max(...lastCards.map(card => card.offsetHeight));
+      const cardHeight = Math.max(mergedHeight, gallery.clientHeight - 64 - footer.offsetHeight);
+      galleryTimeline.set(close, { autoAlpha: 0, y: 0 }, 0);
+      galleryTimeline.set(copy, { autoAlpha: 0, y: 28 }, 0);
+      galleryTimeline.set(cta, { height: mergedHeight, width: '100%', x: 0, y: 0, borderRadius: '32px 32px 0px 0px' }, 0);
+      galleryTimeline.set(footer, {
+        autoAlpha: 0,
+        '--footer-spread': wall.clientWidth / gallery.clientWidth
+      }, 0);
+      galleryTimeline.set(footerEnds, { autoAlpha: 0, x: 0, y: 12 }, 0);
+      galleryTimeline.set(gallery, { backgroundColor: '#004d00' }, 0);
+      lastCards.forEach(card => {
+        galleryTimeline.set(card, { width: '100%', height: 'auto', padding: 8, scaleY: 1, transformOrigin: 'center bottom', '--merge-fill': 0, backgroundColor: '#ffffff', borderRadius: 24, autoAlpha: 1 }, 0);
+        galleryTimeline.set(card.firstElementChild, { opacity: 1 }, 0);
+      });
+      let alignmentEnd = 0;
+      let previousExitEnd = 0;
+      // Let the heading read alongside the arriving cards. Explicit start
+      // values also restore it correctly when ScrollTrigger refreshes.
+      galleryTimeline.fromTo(galleryHeading, { y: 0, autoAlpha: 1 }, {
+        y: () => -(galleryHeading.offsetTop + galleryHeading.offsetHeight + 24),
+        autoAlpha: 0,
+        duration: 1.4,
+        ease: 'sine.inOut'
+      }, 1.35);
+
+      const launchTop = 64;
+      const coastSpeed = wall.clientHeight * 0.24;
+      // Integrate a smooth change in speed: acceleration is zero at both
+      // ends, and the first derivative matches the adjoining drift.
+      const departureRatio = 0.65;
+      const departureEase = t => departureRatio * t + (1 - departureRatio) * (2 * t ** 3 - t ** 4);
+      columns.forEach((column, columnIndex) => {
+        [...column.children].forEach((card, rowIndex) => {
+          const naturalTop = wall.offsetTop + column.offsetTop + card.offsetTop;
+          const arrival = columnIndex * 0.24 + rowIndex * 0.16;
+          const arrivalDuration = 1.2;
+          const entryY = Math.max(0, window.innerHeight - 104 - naturalTop) + card.offsetHeight;
+          const arrivalRatio = coastSpeed * arrivalDuration / entryY;
+          const arrivalEase = t => (2 - arrivalRatio) * t - (1 - arrivalRatio) * (2 * t ** 3 - t ** 4);
+          const isLast = rowIndex === column.children.length - 1;
+          const coastDuration = Math.max(0.3, (naturalTop - launchTop - (isLast ? 64 : 0)) / coastSpeed);
+          const settleDuration = 128 / coastSpeed;
+          const launch = arrival + arrivalDuration + coastDuration;
+          const departureDistance = launchTop + card.offsetHeight + 32;
+          if (isLast) alignmentEnd = Math.max(alignmentEnd, launch + settleDuration);
+          else previousExitEnd = Math.max(previousExitEnd, launch + departureDistance * departureRatio / coastSpeed);
+          galleryTimeline.fromTo(card, {
+            y: entryY
+          }, {
+            y: 0, duration: arrivalDuration, ease: arrivalEase
+          }, arrival)
+          .to(card, {
+            y: () => launchTop + (isLast ? 64 : 0) - naturalTop,
+            duration: coastDuration, ease: 'none', data: 'gallery-drift'
+          }, arrival + arrivalDuration);
+          if (isLast) galleryTimeline.to(card, {
+            y: () => launchTop - naturalTop,
+            duration: settleDuration, ease: 'power1.out', data: 'gallery-settle'
+          }, launch);
+          else galleryTimeline.to(card, {
+            // A longer departure with a continuous, gently rising velocity.
+            y: () => -(naturalTop + card.offsetHeight + 32),
+            duration: departureDistance * departureRatio / coastSpeed,
+            ease: departureEase, data: 'gallery-exit'
+          }, launch);
+        });
+      });
+
+      // Keep the last row on stage. Its real card surfaces become the CTA
+      // background, so the handoff uses the existing contact content/links.
+      const transformAt = Math.max(alignmentEnd, previousExitEnd) + 0.25;
+      const matchAt = transformAt;
+      // A restrained curve keeps these connected phases moving instead of
+      // repeatedly slowing to a standstill at every handoff.
+      const flowEase = t => 0.65 * t + 0.35 * (1 - Math.cos(Math.PI * t)) / 2;
+      galleryTimeline.to(gallery, { backgroundColor: '#ffff00', duration: 1.5, ease: flowEase }, matchAt);
+      // Cover the images directly with green. Fading the images themselves
+      // exposed the white frame underneath during the color transition.
+      galleryTimeline.to(lastCards, {
+        '--merge-fill': 1, duration: 1.8, ease: flowEase
+      }, matchAt);
+      galleryTimeline.set(lastCards, { backgroundColor: '#004d00' }, matchAt + 1.8);
+      galleryTimeline.set(lastCards.map(card => card.firstElementChild), {
+        opacity: 0
+      }, matchAt + 1.8);
+      // Grow together, only downward, before the shared merge.
+      galleryTimeline.to(lastCards, {
+        height: mergedHeight, padding: 0,
+        duration: 1.8, ease: flowEase
+      }, matchAt + 1.8);
+      const mergeAt = matchAt + 3.6;
+      lastCards.forEach((card, index) => {
+        galleryTimeline.to(card, {
+          width: () => columns[index].clientWidth + (index < columns.length - 1 ? parseFloat(getComputedStyle(wall).columnGap) + 1 : 0),
+          borderRadius: index === 0 ? '32px 0px 0px 0px' : index === columns.length - 1 ? '0px 32px 0px 0px' : '0px',
+          duration: 2.6, ease: flowEase
+        }, mergeAt);
+      });
+      const expandAt = mergeAt + 2.6;
+      galleryTimeline.set(close, { autoAlpha: 1 }, expandAt);
+      galleryTimeline.set(lastCards, { autoAlpha: 0 }, expandAt);
+      galleryTimeline.to(cta, {
+        height: cardHeight,
+        duration: 3.6, ease: flowEase
+      }, expandAt);
+      galleryTimeline.to(copy, {
+        autoAlpha: 1, y: 0, stagger: 0.18, duration: 1.4, ease: 'sine.out'
+      }, expandAt + 2.1);
+      // Keep the main card narrow. Grow its central stem by the bar's
+      // height, then extend only the bottom bar toward the screen edges.
+      const footerAt = expandAt + 4.1;
+      galleryTimeline.to(cta, {
+        height: () => cardHeight + footer.offsetHeight,
+        duration: 2.4, ease: flowEase
+      }, footerAt);
+      galleryTimeline.set(footer, { autoAlpha: 1 }, footerAt + 2.4);
+      galleryTimeline.to(footer, {
+        '--footer-spread': 1,
+        duration: 2.8, ease: flowEase
+      }, footerAt + 2.4);
+      galleryTimeline.to(footerEnds, {
+        y: 0, autoAlpha: 1,
+        duration: 1.4, ease: 'sine.out'
+      }, footerAt + 4.3);
+
+    }
+
+    composeCards();
+    // Recalculate launch timing from the actual masonry geometry on resize.
+    ScrollTrigger.addEventListener('refreshInit', composeCards);
+    return () => {
+      ScrollTrigger.removeEventListener('refreshInit', composeCards);
+      gallery.classList.remove('is-animated');
+      close.classList.remove('is-morphing-close');
+      home.replaceWith(close);
+      footer.classList.remove('is-morphing-footer');
+      footerHome.replaceWith(footer);
+    };
+  });
+
+  targets[0].addEventListener('click', event => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+  });
+  document.fonts.ready.then(() => ScrollTrigger.refresh());
+  window.addEventListener('pageshow', () => ScrollTrigger.refresh());
 })();
 </script>
 
@@ -351,5 +688,6 @@ footer{background:var(--deep);color:#a9cf9a;text-align:center;font-size:.875rem;
   loadFrames();
 })();
 </script>
+
 </body>
 </html>

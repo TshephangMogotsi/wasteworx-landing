@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Globe Gallery</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #000;
+        color: #fff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: #000;
+      }
+
+      .gallery {
+        width: min(100%, 1200px);
+        min-height: 100vh;
+        padding: 32px 24px;
+        display: grid;
+        grid-template-columns: 56px minmax(0, 1fr) 56px;
+        grid-template-rows: minmax(0, 1fr) auto;
+        align-items: center;
+        justify-items: center;
+        column-gap: clamp(12px, 3vw, 40px);
+      }
+
+      .frame {
+        width: 100%;
+        height: min(72vh, 680px);
+        min-height: 240px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #242424;
+        background: #050505;
+        overflow: hidden;
+      }
+
+      .frame img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .control {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #383838;
+        border-radius: 50%;
+        background: #101010;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 150ms ease, border-color 150ms ease;
+      }
+
+      .control:hover {
+        border-color: #777;
+        background: #1b1b1b;
+      }
+
+      .control:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 4px;
+      }
+
+      .control svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .position {
+        grid-column: 2;
+        margin: 20px 0 0;
+        color: #a0a0a0;
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.12em;
+      }
+
+      @media (max-width: 520px) {
+        .gallery {
+          padding: 20px 14px;
+          grid-template-columns: 44px minmax(0, 1fr) 44px;
+          column-gap: 8px;
+        }
+
+        .frame {
+          height: min(68vh, 560px);
+          min-height: 200px;
+        }
+
+        .control {
+          width: 42px;
+          height: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="gallery" aria-label="Globe gallery">
+      <button class="control" id="previous" type="button" aria-label="Previous globe">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="frame">
+        <img id="globe" src="./globes%203/globe_001.svg" alt="Globe 1 of 31" />
+      </div>
+      <button class="control" id="next" type="button" aria-label="Next globe">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <p class="position" id="position" aria-live="polite">01 / 31</p>
+    </main>
+    <script>
+      const total = 31;
+      let current = 0;
+
+      const image = document.querySelector("#globe");
+      const position = document.querySelector("#position");
+
+      function showGlobe(index) {
+        current = (index + total) % total;
+        const number = String(current + 1).padStart(3, "0");
+        image.src = `./globes%203/globe_${number}.svg`;
+        image.alt = `Globe ${current + 1} of ${total}`;
+        position.textContent = `${String(current + 1).padStart(2, "0")} / ${total}`;
+      }
+
+      document.querySelector("#previous").addEventListener("click", () => showGlobe(current - 1));
+      document.querySelector("#next").addEventListener("click", () => showGlobe(current + 1));
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft") showGlobe(current - 1);
+        if (event.key === "ArrowRight") showGlobe(current + 1);
+      });
+    </script>
+  </body>
+</html>

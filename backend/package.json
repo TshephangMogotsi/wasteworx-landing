@@ -1,0 +1,16 @@
+{
+  "name": "wasteworx-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "login": "wrangler login",
+    "account": "wrangler whoami",
+    "dev": "wrangler dev",
+    "check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "logs": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.1"
+  }
+}
